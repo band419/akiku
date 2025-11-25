@@ -1,0 +1,23 @@
+# Simple Akiku Configuration
+# A minimal example with one tick subgraph
+
+simulation:
+  max_time: 1000
+  time_step: 10
+
+subgraphs:
+  - id: 1
+    mode: tick
+    tick_period: 10
+    nodes: [100, 101, 102]
+
+nodes:
+  - id: 100
+    type: Counter
+
+  - id: 101
+    type: Counter
+
+  - id: 102
+    type: Counter
+

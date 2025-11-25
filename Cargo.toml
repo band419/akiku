@@ -6,10 +6,31 @@ description = "A generic, high-performance graph-driven simulation engine"
 license = "MIT"
 authors = ["Akiku Team"]
 
+[features]
+default = []
+parallel = ["rayon"]
+
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+serde_yaml = "0.9"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+thiserror = "1.0"
+rayon = { version = "1.10", optional = true }
+parking_lot = "0.12"
+crossbeam-channel = "0.5"
 
 [dev-dependencies]
 tokio = { version = "1.0", features = ["full", "test-util"] }
+tempfile = "3.0"
+criterion = { version = "0.5", features = ["html_reports"] }
+rand = "0.8"
 
+[[bench]]
+name = "simulation_bench"
+harness = false
+
+[[example]]
+name = "mini_cache"
+path = "examples/mini_cache.rs"

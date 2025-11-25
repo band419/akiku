@@ -1,0 +1,93 @@
+# Akiku Simulation Configuration Example
+#
+# This file demonstrates the configuration format for the Akiku simulation framework.
+
+# Global simulation parameters
+simulation:
+  max_time: 10000          # Maximum simulation time (in SimTime units)
+  time_step: 10            # Global time step for engine coordination
+  log_level: info          # Logging level: trace, debug, info, warn, error
+  collect_stats: true      # Enable detailed statistics collection
+  output_dir: ./output     # Output directory for results
+
+# Subgraph definitions
+subgraphs:
+  # A tick-driven subgraph for cycle-accurate pipeline simulation
+  - id: 1
+    mode: tick
+    tick_period: 10        # Execute every 10 time units
+    nodes: [1001, 1002, 1003]
+    thread_affinity: 0     # Optional: pin to CPU 0
+
+  # An event-driven subgraph for memory/network simulation
+  - id: 2
+    mode: event
+    nodes: [2001, 2002]
+
+  # Another tick subgraph with different period
+  - id: 3
+    mode: tick
+    tick_period: 20        # Coarser granularity
+    nodes: [3001]
+
+# Channel definitions for inter-subgraph communication
+channels:
+  # Pipeline to Memory
+  - src: 1
+    dst: 2
+    latency: 5             # 5 time unit transmission delay
+    alignment: CeilToTick  # Align event times to tick boundaries
+
+  # Memory back to Pipeline
+  - src: 2
+    dst: 1
+    latency: 10
+    alignment: CeilToTick
+    capacity: 100          # Optional: queue capacity for backpressure
+
+  # Cross-tick communication
+  - src: 1
+    dst: 3
+    latency: 0
+    alignment: CeilToTick
+
+# Node definitions
+nodes:
+  # Pipeline stage nodes (tick-driven)
+  - id: 1001
+    type: Counter
+    attrs:
+      name: "Fetch"
+
+  - id: 1002
+    type: Counter
+    attrs:
+      name: "Decode"
+
+  - id: 1003
+    type: Source
+    attrs:
+      name: "Execute"
+      target: "2001"
+      port: "request"
+
+  # Memory controller nodes (event-driven)
+  - id: 2001
+    type: Echo
+    attrs:
+      name: "MemController"
+      delay: "50"
+
+  - id: 2002
+    type: PassThrough
+    attrs:
+      name: "MemBuffer"
+      target: "1001"
+      port: "response"
+
+  # Coarse-grained tracker
+  - id: 3001
+    type: Counter
+    attrs:
+      name: "StatsCollector"
+
